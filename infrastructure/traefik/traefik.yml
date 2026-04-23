@@ -1,0 +1,15 @@
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: clinicos_network
+
+log:
+  level: INFO

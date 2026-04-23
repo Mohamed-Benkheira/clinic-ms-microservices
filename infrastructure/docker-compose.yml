@@ -1,0 +1,227 @@
+networks:
+  clinicos_network:
+    driver: bridge
+
+volumes:
+  postgres_auth_data:
+  postgres_patient_data:
+  postgres_appointment_data:
+  postgres_doctor_data:
+  rabbitmq_data:
+  consul_data:
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: clinicos_traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - clinicos_network
+
+  consul:
+    image: hashicorp/consul:1.17
+    container_name: clinicos_consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    volumes:
+      - consul_data:/consul/data
+      - ./consul/consul.json:/consul/config/consul.json:ro
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0"
+    networks:
+      - clinicos_network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: clinicos_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_VHOST: clinicos
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - clinicos_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_auth:
+    image: postgres:16-alpine
+    container_name: clinicos_postgres_auth
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - clinicos_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_patient:
+    image: postgres:16-alpine
+    container_name: clinicos_postgres_patient
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: patient_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_patient_data:/var/lib/postgresql/data
+    networks:
+      - clinicos_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d patient_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_doctor:
+    image: postgres:16-alpine
+    container_name: clinicos_postgres_doctor
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: doctor_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_doctor_data:/var/lib/postgresql/data
+    networks:
+      - clinicos_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d doctor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_appointment:
+    image: postgres:16-alpine
+    container_name: clinicos_postgres_appointment
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: appointment_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_appointment_data:/var/lib/postgresql/data
+    networks:
+      - clinicos_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d appointment_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth_service:
+    build:
+      context: ../auth-service
+      dockerfile: Dockerfile
+    container_name: clinicos_auth
+    restart: unless-stopped
+    env_file:
+      - ../auth-service/.env
+    networks:
+      - clinicos_network
+    ports:
+      - "8001:8001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=8001"
+    depends_on:
+      postgres_auth:
+        condition: service_healthy
+
+  patient_service:
+    build:
+      context: ../patient-service
+      dockerfile: Dockerfile
+    container_name: clinicos_patient
+    restart: unless-stopped
+    env_file:
+      - ../patient-service/.env
+    networks:
+      - clinicos_network
+    ports:
+      - "8002:8002"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.patient.rule=PathPrefix(`/api/patients`)"
+      - "traefik.http.services.patient.loadbalancer.server.port=8002"
+    depends_on:
+      postgres_patient:
+        condition: service_healthy
+
+  doctor_service:
+    build:
+      context: ../doctor-service
+      dockerfile: Dockerfile
+    container_name: clinicos_doctor
+    restart: unless-stopped
+    env_file:
+      - ../doctor-service/.env
+    networks:
+      - clinicos_network
+    ports:
+      - "8003:8003"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.doctor.rule=PathPrefix(`/api/doctors`)"
+      - "traefik.http.services.doctor.loadbalancer.server.port=8003"
+    depends_on:
+      postgres_doctor:
+        condition: service_healthy
+
+  appointment_service:
+    build:
+      context: ../appointment-service
+      dockerfile: Dockerfile
+    container_name: clinicos_appointment
+    restart: unless-stopped
+    env_file:
+      - ../appointment-service/.env
+    networks:
+      - clinicos_network
+    ports:
+      - "8004:8004"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.appointment.rule=PathPrefix(`/api/appointments`)"
+      - "traefik.http.services.appointment.loadbalancer.server.port=8004"
+    depends_on:
+      postgres_appointment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notification_worker:
+    build:
+      context: ../notification-worker
+      dockerfile: Dockerfile
+    container_name: clinicos_notification
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: amqp://clinicos:rabbit2025@clinicos_rabbitmq:5672/clinicos
+    networks:
+      - clinicos_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
