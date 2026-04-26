@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'rest_framework',
     'rest_framework_simplejwt',
+        'rest_framework_simplejwt.token_blacklist',  # ← ADD
     'corsheaders',
     'accounts',
 ]
@@ -47,6 +48,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_RENDERER_CLASSES': (          # ← ADD THIS
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
 SIMPLE_JWT = {
@@ -55,6 +59,10 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
+        'TOKEN_OBTAIN_SERIALIZER': 'accounts.serializers.CustomTokenObtainPairSerializer',  # ← ADD
+    'ROTATE_REFRESH_TOKENS':  True,   # ← ADD (new refresh token on every refresh)
+    'BLACKLIST_AFTER_ROTATION': True, # ← ADD (old refresh tokens auto-blacklisted)
+
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
