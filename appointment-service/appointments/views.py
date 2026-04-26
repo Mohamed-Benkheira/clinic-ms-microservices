@@ -3,18 +3,27 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from datetime import timedelta
-from django.utils.dateparse import parse_datetime
 from .models import Appointment
 from .serializers import AppointmentSerializer
 from .publisher import publish_appointment_created
 
+
+def get_role(request):
+    return getattr(request.user, 'role', None)
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def appointment_list(request):
+    role = get_role(request)
+
+    if role not in ['admin', 'receptionist', 'doctor']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
     if request.method == 'GET':
         appointments = Appointment.objects.all()
-        doctor_id  = request.query_params.get('doctor_id')
-        patient_id = request.query_params.get('patient_id')
+        doctor_id     = request.query_params.get('doctor_id')
+        patient_id    = request.query_params.get('patient_id')
         status_filter = request.query_params.get('status')
 
         if doctor_id:
@@ -26,7 +35,10 @@ def appointment_list(request):
 
         return Response(AppointmentSerializer(appointments, many=True).data)
 
-    # POST — create appointment
+    # POST — admin and receptionist only
+    if role not in ['admin', 'receptionist']:
+        return Response({'error': 'Only admin and receptionist can create appointments'}, status=status.HTTP_403_FORBIDDEN)
+
     serializer = AppointmentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -51,7 +63,6 @@ def appointment_list(request):
 
     appointment = serializer.save()
 
-    # Publish to RabbitMQ
     publish_appointment_created({
         'id':           appointment.id,
         'patient_id':   appointment.patient_id,
@@ -67,6 +78,11 @@ def appointment_list(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def appointment_detail(request, pk):
+    role = get_role(request)
+
+    if role not in ['admin', 'receptionist', 'doctor']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
     try:
         appointment = Appointment.objects.get(pk=pk)
     except Appointment.DoesNotExist:
@@ -76,14 +92,48 @@ def appointment_detail(request, pk):
         return Response(AppointmentSerializer(appointment).data)
 
     if request.method == 'PUT':
-        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+        if role not in ['admin', 'receptionist']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        # doctors can only update status, not reschedule
+        if role == 'doctor':
+            allowed = {k: v for k, v in request.data.items() if k in ['status', 'notes']}
+            serializer = AppointmentSerializer(appointment, data=allowed, partial=True)
+        else:
+            serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # DELETE — admin only
+    if role != 'admin':
+        return Response({'error': 'Only admins can delete appointments'}, status=status.HTTP_403_FORBIDDEN)
     appointment.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def appointment_status(request, pk):
+    role = get_role(request)
+
+    if role not in ['admin', 'receptionist', 'doctor']:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        appointment = Appointment.objects.get(pk=pk)
+    except Appointment.DoesNotExist:
+        return Response({'error': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    new_status = request.data.get('status')
+    if new_status not in ['scheduled', 'completed', 'cancelled']:
+        return Response({'error': 'Invalid status. Choose: scheduled, completed, cancelled'}, status=status.HTTP_400_BAD_REQUEST)
+
+    appointment.status = new_status
+    appointment.save()
+    return Response(AppointmentSerializer(appointment).data)
 
 
 @api_view(['GET'])
