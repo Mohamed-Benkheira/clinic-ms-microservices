@@ -8,8 +8,9 @@ entryPoints:
 
 providers:
   docker:
+    endpoint: "tcp://clinicos_socket_proxy:2375"
     exposedByDefault: false
-    network: clinicos_network
+    network: infrastructure_clinicos_network
 
 log:
   level: INFO

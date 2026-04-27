@@ -11,15 +11,32 @@ volumes:
   consul_data:
 
 services:
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: clinicos_socket_proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: 1
+      NETWORKS: 1
+      SERVICES: 1
+      INFO: 1
+    networks:
+      - clinicos_network
+
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.3
     container_name: clinicos_traefik
     restart: unless-stopped
+    depends_on:
+      - socket-proxy
     ports:
       - "80:80"
       - "8080:8080"
+    environment:
+      - DOCKER_API_VERSION=1.47
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
     networks:
       - clinicos_network
@@ -228,14 +245,12 @@ services:
 
   ui_service:
     build:
-      context: ../ui-service
+      context: ../clinicos-hub-main
       dockerfile: Dockerfile
     container_name: clinicos_ui
     restart: unless-stopped
     networks:
       - clinicos_network
-    ports:
-      - "3000:3000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ui.rule=PathPrefix(`/`)"

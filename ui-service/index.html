@@ -3,13 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ClinicOS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        var _fetch = window.fetch;
+        try {
+          Object.defineProperty(window, 'fetch', {
+            enumerable: true,
+            configurable: true,
+            get: function() { return _fetch; },
+            set: function(v) { console.warn('Fetch overwrite blocked'); }
+          });
+        } catch(e) {}
+      })();
+    </script>
+    <title>HealthOps AI - Hospital Management System</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+
