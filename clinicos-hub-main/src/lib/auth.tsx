@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Role } from "./types";
 import { loginRequest, logoutRequest, getMeRequest } from "./api/auth.api";
 import { clearToken, getToken } from "./api/client";
@@ -59,7 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       sessionStorage.setItem(USER_KEY, JSON.stringify(authUser));
       sessionStorage.setItem(REFRESH_KEY, u.refresh);
-    } catch { /* sandboxed */ }
+    } catch {
+      /* sandboxed */
+    }
   };
 
   const logout = async () => {
@@ -69,14 +65,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       sessionStorage.removeItem(USER_KEY);
       sessionStorage.removeItem(REFRESH_KEY);
-    } catch { /* sandboxed */ }
+    } catch {
+      /* sandboxed */
+    }
   };
 
-  return (
-    <Ctx.Provider value={{ user, isLoading, login, logout }}>
-      {children}
-    </Ctx.Provider>
-  );
+  return <Ctx.Provider value={{ user, isLoading, login, logout }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

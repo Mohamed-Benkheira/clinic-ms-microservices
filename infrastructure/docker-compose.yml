@@ -9,33 +9,31 @@ volumes:
   postgres_doctor_data:
   rabbitmq_data:
   consul_data:
+  notif_data:
 
 services:
   socket-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: alpine/socat
     container_name: clinicos_socket_proxy
     restart: unless-stopped
+    ports:
+      - "2375:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      CONTAINERS: 1
-      NETWORKS: 1
-      SERVICES: 1
-      INFO: 1
+    command: "TCP-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
     networks:
       - clinicos_network
 
   traefik:
-    image: traefik:v3.3
+    image: traefik:v2.11
     container_name: clinicos_traefik
     restart: unless-stopped
-    depends_on:
-      - socket-proxy
-    ports:
-      - "80:80"
-      - "8080:8080"
+    privileged: true
     environment:
-      - DOCKER_API_VERSION=1.47
+      - DOCKER_HOST=tcp://clinicos_socket_proxy:2375
+    ports:
+      - "8888:80"
+      - "8889:8080"
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
     networks:
@@ -237,11 +235,33 @@ services:
     restart: unless-stopped
     environment:
       RABBITMQ_URL: amqp://clinicos:rabbit2025@clinicos_rabbitmq:5672/clinicos
+      PATIENT_SERVICE_URL: http://clinicos_patient:8002
+      AUTH_SERVICE_URL: http://clinicos_auth:8001
+      DATABASE_URL: sqlite:///./notifications.db
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_USER: 1rerain1@gmail.com
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-your-smtp-password}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-twilio-account-sid}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-twilio-auth-token}
+      TWILIO_WA_FROM: ${TWILIO_WA_FROM:-whatsapp:+14155238886}
     networks:
       - clinicos_network
+    ports:
+      - "8005:8005"
+    volumes:
+      - notif_data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.notification.rule=PathPrefix(`/api/notifications`)"
+      - "traefik.http.services.notification.loadbalancer.server.port=8005"
     depends_on:
       rabbitmq:
         condition: service_healthy
+      patient_service:
+        condition: service_started
+      auth_service:
+        condition: service_started
 
   ui_service:
     build:

@@ -33,16 +33,16 @@ function downStatus(s: FrontendStatus): BackendStatus {
 
 export function normalizeAppointment(a: BackendAppointment): Appointment {
   return {
-    id:              String(a.id),
-    patientId:       String(a.patient_id),
-    doctorId:        String(a.doctor_id),
-    datetime:        a.scheduled_at,
-    status:          upStatus(a.status),
-    reason:          a.reason,
-    notes:           a.notes ?? "",
+    id: String(a.id),
+    patientId: String(a.patient_id),
+    doctorId: String(a.doctor_id),
+    datetime: a.scheduled_at,
+    status: upStatus(a.status),
+    reason: a.reason,
+    notes: a.notes ?? "",
     appointmentType: "Consultation",
-    duration:        "30 min",
-    notifyPatient:   false,
+    duration: "30 min",
+    notifyPatient: false,
   };
 }
 
@@ -58,21 +58,23 @@ export async function fetchAppointment(id: string): Promise<Appointment> {
 
 export async function createAppointment(payload: Omit<Appointment, "id">): Promise<Appointment> {
   const body: BackendAppointmentPayload = {
-    patient_id:   Number(payload.patientId),
-    doctor_id:    Number(payload.doctorId),
+    patient_id: Number(payload.patientId),
+    doctor_id: Number(payload.doctorId),
     scheduled_at: payload.datetime,
-    reason:       payload.reason,
-    notes:        payload.notes,
+    reason: payload.reason,
+    notes: payload.notes,
   };
   const { data } = await apiClient.post<BackendAppointment>("/api/appointments/", body);
   return normalizeAppointment(data);
 }
 
-export async function updateAppointmentStatus(id: string, status: FrontendStatus): Promise<Appointment> {
-  const { data } = await apiClient.patch<BackendAppointment>(
-    `/api/appointments/${id}/status/`,
-    { status: downStatus(status) }
-  );
+export async function updateAppointmentStatus(
+  id: string,
+  status: FrontendStatus,
+): Promise<Appointment> {
+  const { data } = await apiClient.patch<BackendAppointment>(`/api/appointments/${id}/status/`, {
+    status: downStatus(status),
+  });
   return normalizeAppointment(data);
 }
 

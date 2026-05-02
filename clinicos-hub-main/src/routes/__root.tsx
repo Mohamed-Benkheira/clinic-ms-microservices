@@ -42,7 +42,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "ClinicOS — Premium Medical SaaS Platform" },
-      { name: "description", content: "Streamline clinic operations with ClinicOS — appointments, patients, doctors, and notifications in one platform." },
+      {
+        name: "description",
+        content:
+          "Streamline clinic operations with ClinicOS — appointments, patients, doctors, and notifications in one platform.",
+      },
       { name: "author", content: "ClinicOS" },
       { property: "og:title", content: "ClinicOS — Premium Medical SaaS Platform" },
       { property: "og:description", content: "Streamline clinic operations with ClinicOS." },

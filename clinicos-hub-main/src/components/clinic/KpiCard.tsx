@@ -15,14 +15,24 @@ export interface KpiCardProps {
   storageKey?: string;
 }
 
-export function KpiCard({ title, value, icon: Icon, iconColor, iconBg, trend, spark, storageKey }: KpiCardProps) {
+export function KpiCard({
+  title,
+  value,
+  icon: Icon,
+  iconColor,
+  iconBg,
+  trend,
+  spark,
+  storageKey,
+}: KpiCardProps) {
   const trendColor =
     trend?.direction === "up"
       ? "text-[var(--clinic-blue)] bg-[var(--clinic-blue-soft)]"
       : trend?.direction === "down"
         ? "text-[var(--clinic-red)] bg-[var(--clinic-red-soft)]"
         : "text-muted-foreground bg-muted";
-  const TrendIcon = trend?.direction === "up" ? TrendingUp : trend?.direction === "down" ? TrendingDown : Minus;
+  const TrendIcon =
+    trend?.direction === "up" ? TrendingUp : trend?.direction === "down" ? TrendingDown : Minus;
   const sparkData = (spark ?? []).map((v, i) => ({ i, v }));
 
   return (
@@ -46,7 +56,12 @@ export function KpiCard({ title, value, icon: Icon, iconColor, iconBg, trend, sp
       </div>
       {trend && (
         <div className="mt-3">
-          <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium", trendColor)}>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium",
+              trendColor,
+            )}
+          >
             <TrendIcon className="h-3 w-3" />
             {trend.value > 0 ? "+" : ""}
             {trend.value}%
@@ -63,7 +78,13 @@ export function KpiCard({ title, value, icon: Icon, iconColor, iconBg, trend, sp
                   <stop offset="100%" stopColor="var(--clinic-blue)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Area type="monotone" dataKey="v" stroke="var(--clinic-blue)" strokeWidth={1.5} fill={`url(#spark-${title})`} />
+              <Area
+                type="monotone"
+                dataKey="v"
+                stroke="var(--clinic-blue)"
+                strokeWidth={1.5}
+                fill={`url(#spark-${title})`}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>

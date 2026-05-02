@@ -38,7 +38,7 @@ def patient_list(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def patient_detail(request, pk):
     role = get_role(request)
@@ -54,7 +54,7 @@ def patient_detail(request, pk):
     if request.method == 'GET':
         return Response(PatientSerializer(patient).data)
 
-    if request.method == 'PUT':
+    if request.method in ['PUT', 'PATCH']:
         if role not in ['admin', 'receptionist']:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         serializer = PatientSerializer(patient, data=request.data, partial=True)

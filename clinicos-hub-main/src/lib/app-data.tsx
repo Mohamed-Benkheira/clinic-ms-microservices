@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type {
   Appointment,
   Conversation,
@@ -31,7 +39,9 @@ interface AppDataCtx {
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
   templates: NotificationTemplate[];
   setTemplates: React.Dispatch<React.SetStateAction<NotificationTemplate[]>>;
-  addTemplate: (t: Omit<NotificationTemplate, "id" | "createdAt"> & { id?: string }) => NotificationTemplate;
+  addTemplate: (
+    t: Omit<NotificationTemplate, "id" | "createdAt"> & { id?: string },
+  ) => NotificationTemplate;
   updateTemplate: (id: string, patch: Partial<NotificationTemplate>) => void;
   removeTemplate: (id: string) => void;
   updateAppointment: (id: string, patch: Partial<Appointment>) => void;
@@ -77,11 +87,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleDoctorStatus = useCallback((id: string) => {
-    setDoctors((ds) => ds.map((d) => (d.id === id ? { ...d, status: d.status === "AVAILABLE" ? "BUSY" : "AVAILABLE" } : d)));
+    setDoctors((ds) =>
+      ds.map((d) =>
+        d.id === id ? { ...d, status: d.status === "AVAILABLE" ? "BUSY" : "AVAILABLE" } : d,
+      ),
+    );
   }, []);
 
   const addMessage = useCallback((m: Omit<Message, "id"> & { id?: string }) => {
-    const created: Message = { ...(m as Message), id: m.id ?? `m${Date.now()}_${Math.random().toString(36).slice(2, 6)}` };
+    const created: Message = {
+      ...(m as Message),
+      id: m.id ?? `m${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    };
     setMessages((xs) => [...xs, created]);
     setConversations((cs) =>
       cs.map((c) => (c.id === created.conversationId ? { ...c, lastActivity: created.sentAt } : c)),
@@ -107,19 +124,27 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const unreadCountFor = useCallback(
     (conversationId: string, userId: string) =>
-      messages.filter((m) => m.conversationId === conversationId && m.senderId !== userId && !m.readBy.includes(userId)).length,
+      messages.filter(
+        (m) =>
+          m.conversationId === conversationId &&
+          m.senderId !== userId &&
+          !m.readBy.includes(userId),
+      ).length,
     [messages],
   );
 
-  const addTemplate = useCallback((t: Omit<NotificationTemplate, "id" | "createdAt"> & { id?: string }) => {
-    const created: NotificationTemplate = {
-      ...t,
-      id: t.id ?? `t${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    } as NotificationTemplate;
-    setTemplates((xs) => [created, ...xs]);
-    return created;
-  }, []);
+  const addTemplate = useCallback(
+    (t: Omit<NotificationTemplate, "id" | "createdAt"> & { id?: string }) => {
+      const created: NotificationTemplate = {
+        ...t,
+        id: t.id ?? `t${Date.now()}`,
+        createdAt: new Date().toISOString(),
+      } as NotificationTemplate;
+      setTemplates((xs) => [created, ...xs]);
+      return created;
+    },
+    [],
+  );
 
   const updateTemplate = useCallback((id: string, patch: Partial<NotificationTemplate>) => {
     setTemplates((xs) => xs.map((x) => (x.id === id ? { ...x, ...patch } : x)));
@@ -135,7 +160,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const tick = () => {
       const now = Date.now();
       const due = notifications.filter(
-        (n) => n.status === "PENDING" && n.scheduledFor && +new Date(n.scheduledFor) <= now && !dispatchedRef.current.has(n.id),
+        (n) =>
+          n.status === "PENDING" &&
+          n.scheduledFor &&
+          +new Date(n.scheduledFor) <= now &&
+          !dispatchedRef.current.has(n.id),
       );
       if (due.length === 0) return;
       due.forEach((n) => {
@@ -144,7 +173,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           const ok = Math.random() < 0.85;
           setNotifications((ns) =>
             ns.map((x) =>
-              x.id === n.id ? { ...x, status: ok ? "SENT" : "FAILED", timestamp: new Date().toISOString() } : x,
+              x.id === n.id
+                ? { ...x, status: ok ? "SENT" : "FAILED", timestamp: new Date().toISOString() }
+                : x,
             ),
           );
         }, 600);

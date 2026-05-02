@@ -10,9 +10,9 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        "/api/auth":         { target: "http://localhost:8001", changeOrigin: true },
-        "/api/patients":     { target: "http://localhost:8002", changeOrigin: true },
-        "/api/doctors":      { target: "http://localhost:8003", changeOrigin: true },
+        "/api/auth": { target: "http://localhost:8001", changeOrigin: true },
+        "/api/patients": { target: "http://localhost:8002", changeOrigin: true },
+        "/api/doctors": { target: "http://localhost:8003", changeOrigin: true },
         "/api/appointments": { target: "http://localhost:8004", changeOrigin: true },
       },
     },

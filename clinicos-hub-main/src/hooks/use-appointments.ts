@@ -11,7 +11,7 @@ import type { Appointment } from "../lib/types";
 export function useAppointments(params?: Record<string, string>) {
   return useQuery({
     queryKey: [...queryKeys.appointments.all, params],
-    queryFn:  () => fetchAppointments(params),
+    queryFn: () => fetchAppointments(params),
     staleTime: 20_000,
   });
 }
@@ -20,7 +20,7 @@ export function useCreateAppointment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: Omit<Appointment, "id">) => createAppointment(payload),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: queryKeys.appointments.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.appointments.all }),
   });
 }
 
@@ -37,6 +37,6 @@ export function useCancelAppointment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => cancelAppointment(id),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: queryKeys.appointments.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.appointments.all }),
   });
 }

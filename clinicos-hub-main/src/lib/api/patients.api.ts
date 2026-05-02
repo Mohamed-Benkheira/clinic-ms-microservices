@@ -26,22 +26,22 @@ export interface BackendPatientPayload {
 
 export function normalizePatient(p: BackendPatient): Patient {
   return {
-    id:     String(p.id),
-    name:   p.full_name,
-    email:  p.email,
-    phone:  p.phone,
+    id: String(p.id),
+    name: p.full_name,
+    email: p.email,
+    phone: p.phone,
     gender: p.gender === "female" ? "F" : "M",
-    dob:    p.date_of_birth ?? "",
-    notes:  p.medical_notes ?? "",
+    dob: p.date_of_birth ?? "",
+    notes: p.medical_notes ?? "",
   };
 }
 
 export function denormalizePatient(p: Omit<Patient, "id">): BackendPatientPayload {
   return {
-    full_name:     p.name,
-    email:         p.email,
-    phone:         p.phone,
-    gender:        p.gender === "F" ? "female" : "male",
+    full_name: p.name,
+    email: p.email,
+    phone: p.phone,
+    gender: p.gender === "F" ? "female" : "male",
     date_of_birth: p.dob || undefined,
     medical_notes: p.notes,
   };
@@ -58,17 +58,20 @@ export async function fetchPatient(id: string): Promise<Patient> {
 }
 
 export async function createPatient(payload: Omit<Patient, "id">): Promise<Patient> {
-  const { data } = await apiClient.post<BackendPatient>("/api/patients/", denormalizePatient(payload));
+  const { data } = await apiClient.post<BackendPatient>(
+    "/api/patients/",
+    denormalizePatient(payload),
+  );
   return normalizePatient(data);
 }
 
 export async function updatePatient(id: string, payload: Partial<Patient>): Promise<Patient> {
   const partial: Partial<BackendPatientPayload> = {};
-  if (payload.name)              partial.full_name     = payload.name;
-  if (payload.email)             partial.email         = payload.email;
-  if (payload.phone)             partial.phone         = payload.phone;
-  if (payload.gender)            partial.gender        = payload.gender === "F" ? "female" : "male";
-  if (payload.dob)               partial.date_of_birth = payload.dob;
+  if (payload.name) partial.full_name = payload.name;
+  if (payload.email) partial.email = payload.email;
+  if (payload.phone) partial.phone = payload.phone;
+  if (payload.gender) partial.gender = payload.gender === "F" ? "female" : "male";
+  if (payload.dob) partial.date_of_birth = payload.dob;
   if (payload.notes !== undefined) partial.medical_notes = payload.notes;
   const { data } = await apiClient.patch<BackendPatient>(`/api/patients/${id}/`, partial);
   return normalizePatient(data);
@@ -79,9 +82,8 @@ export async function deletePatient(id: string): Promise<void> {
 }
 
 export async function updatePatientNotes(id: string, notes: string): Promise<Patient> {
-  const { data } = await apiClient.patch<BackendPatient>(
-    `/api/patients/${id}/notes/`,
-    { medical_notes: notes }
-  );
+  const { data } = await apiClient.patch<BackendPatient>(`/api/patients/${id}/notes/`, {
+    medical_notes: notes,
+  });
   return normalizePatient(data);
 }

@@ -36,10 +36,10 @@ export async function loginRequest(payload: LoginPayload): Promise<NormalizedAut
   const { data } = await apiClient.post<BackendAuthResponse>("/api/auth/login/", payload);
   setToken(data.access);
   return {
-    id:      String(data.user.id),
-    email:   data.user.email,
-    name:    data.user.full_name,
-    role:    normalizeRole(data.user.role),
+    id: String(data.user.id),
+    email: data.user.email,
+    name: data.user.full_name,
+    role: normalizeRole(data.user.role),
     refresh: data.refresh,
   };
 }
@@ -47,7 +47,9 @@ export async function loginRequest(payload: LoginPayload): Promise<NormalizedAut
 export async function logoutRequest(refresh: string): Promise<void> {
   try {
     await apiClient.post("/api/auth/logout/", { refresh });
-  } catch { /* best effort */ }
+  } catch {
+    /* best effort */
+  }
   clearToken();
 }
 
@@ -60,10 +62,10 @@ export async function refreshTokenRequest(refresh: string): Promise<string> {
 export async function getMeRequest(): Promise<NormalizedAuthUser> {
   const { data } = await apiClient.get<BackendAuthResponse["user"]>("/api/auth/me/");
   return {
-    id:      String(data.id),
-    email:   data.email,
-    name:    data.full_name,
-    role:    normalizeRole(data.role),
+    id: String(data.id),
+    email: data.email,
+    name: data.full_name,
+    role: normalizeRole(data.role),
     refresh: "",
   };
 }

@@ -56,7 +56,15 @@ import { StatusBadge } from "../StatusBadge";
 import { useAppData } from "@/lib/app-data";
 import { toast } from "sonner";
 
-const Panel = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => (
+const Panel = ({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -69,7 +77,9 @@ const Panel = ({ children, delay = 0, className = "" }: { children: React.ReactN
 
 const trendData = (days: number) =>
   Array.from({ length: days }, (_, i) => ({
-    day: dayjs().subtract(days - 1 - i, "day").format("MMM D"),
+    day: dayjs()
+      .subtract(days - 1 - i, "day")
+      .format("MMM D"),
     Scheduled: Math.round(8 + Math.random() * 6),
     Completed: Math.round(5 + Math.random() * 5),
     Cancelled: Math.round(1 + Math.random() * 2),
@@ -77,7 +87,8 @@ const trendData = (days: number) =>
 
 export function AdminDashboard() {
   const navigate = useNavigate();
-  const { patients, doctors, appointments, notifications, updateAppointment, removeAppointment } = useAppData();
+  const { patients, doctors, appointments, notifications, updateAppointment, removeAppointment } =
+    useAppData();
   const [range, setRange] = useState<7 | 14 | 30>(14);
   const trends = useMemo(() => trendData(range), [range]);
 
@@ -111,11 +122,20 @@ export function AdminDashboard() {
     acc[d.specialty] = (acc[d.specialty] ?? 0) + 1;
     return acc;
   }, {});
-  const specData = Object.entries(specs).slice(0, 4).map(([name, value]) => ({ name, value }));
+  const specData = Object.entries(specs)
+    .slice(0, 4)
+    .map(([name, value]) => ({ name, value }));
 
-  const recent = useMemo(() => [...appointments].sort((a, b) => +new Date(b.datetime) - +new Date(a.datetime)).slice(0, 8), [appointments]);
+  const recent = useMemo(
+    () =>
+      [...appointments].sort((a, b) => +new Date(b.datetime) - +new Date(a.datetime)).slice(0, 8),
+    [appointments],
+  );
 
-  const todayNotifs = useMemo(() => notifications.filter((n) => dayjs(n.timestamp).isSame(dayjs(), "day")), [notifications]);
+  const todayNotifs = useMemo(
+    () => notifications.filter((n) => dayjs(n.timestamp).isSame(dayjs(), "day")),
+    [notifications],
+  );
   const todayNotifCounts = {
     sent: todayNotifs.filter((n) => n.status === "SENT").length,
     failed: todayNotifs.filter((n) => n.status === "FAILED").length,
@@ -123,12 +143,48 @@ export function AdminDashboard() {
   };
 
   const activity = [
-    { id: 1, type: "booked", text: "Sarah Johnson booked a follow-up with Dr. Benali", time: "2m ago", color: "var(--clinic-blue)" },
-    { id: 2, type: "completed", text: "Dr. Park marked appointment with Aisha Patel as completed", time: "12m ago", color: "var(--clinic-green)" },
-    { id: 3, type: "cancelled", text: "Emily Davis cancelled tomorrow's consultation", time: "27m ago", color: "var(--clinic-red)" },
-    { id: 4, type: "system", text: "Daily backup completed successfully", time: "1h ago", color: "var(--clinic-yellow)" },
-    { id: 5, type: "booked", text: "Walk-in patient added by Jamie", time: "2h ago", color: "var(--clinic-blue)" },
-    { id: 6, type: "completed", text: "Lab results uploaded for Michael Chen", time: "3h ago", color: "var(--clinic-green)" },
+    {
+      id: 1,
+      type: "booked",
+      text: "Sarah Johnson booked a follow-up with Dr. Benali",
+      time: "2m ago",
+      color: "var(--clinic-blue)",
+    },
+    {
+      id: 2,
+      type: "completed",
+      text: "Dr. Park marked appointment with Aisha Patel as completed",
+      time: "12m ago",
+      color: "var(--clinic-green)",
+    },
+    {
+      id: 3,
+      type: "cancelled",
+      text: "Emily Davis cancelled tomorrow's consultation",
+      time: "27m ago",
+      color: "var(--clinic-red)",
+    },
+    {
+      id: 4,
+      type: "system",
+      text: "Daily backup completed successfully",
+      time: "1h ago",
+      color: "var(--clinic-yellow)",
+    },
+    {
+      id: 5,
+      type: "booked",
+      text: "Walk-in patient added by Jamie",
+      time: "2h ago",
+      color: "var(--clinic-blue)",
+    },
+    {
+      id: 6,
+      type: "completed",
+      text: "Lab results uploaded for Michael Chen",
+      time: "3h ago",
+      color: "var(--clinic-green)",
+    },
   ];
   const [feed, setFeed] = useState(activity);
 
@@ -205,7 +261,9 @@ export function AdminDashboard() {
                     key={d}
                     onClick={() => setRange(d as 7 | 14 | 30)}
                     className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      range === d ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      range === d
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {d}d
@@ -230,14 +288,50 @@ export function AdminDashboard() {
                       <stop offset="100%" stopColor="var(--clinic-red)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--clinic-border-subtle)" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--clinic-border-subtle)" }} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--clinic-border-subtle)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 8,
+                      border: "1px solid var(--clinic-border-subtle)",
+                    }}
+                  />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Area type="monotone" dataKey="Scheduled" stroke="var(--clinic-blue)" fill="url(#g-sched)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="Completed" stroke="var(--clinic-blue-strong)" fill="url(#g-comp)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="Cancelled" stroke="var(--clinic-red)" fill="url(#g-canc)" strokeWidth={2} />
+                  <Area
+                    type="monotone"
+                    dataKey="Scheduled"
+                    stroke="var(--clinic-blue)"
+                    fill="url(#g-sched)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Completed"
+                    stroke="var(--clinic-blue-strong)"
+                    fill="url(#g-comp)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Cancelled"
+                    stroke="var(--clinic-red)"
+                    fill="url(#g-canc)"
+                    strokeWidth={2}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -251,7 +345,13 @@ export function AdminDashboard() {
             <div className="relative mx-auto mt-2 h-44 w-full">
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={statusPie} dataKey="value" innerRadius={55} outerRadius={75} paddingAngle={2}>
+                  <Pie
+                    data={statusPie}
+                    dataKey="value"
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={2}
+                  >
                     {statusPie.map((s) => (
                       <Cell key={s.name} fill={s.color} />
                     ))}
@@ -267,11 +367,17 @@ export function AdminDashboard() {
               {statusPie.map((s) => (
                 <div key={s.name} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: s.color }}
+                    />
                     <span className="text-muted-foreground">{s.name}</span>
                   </div>
                   <span className="font-medium">
-                    {s.value} <span className="text-xs text-muted-foreground">({Math.round((s.value / total) * 100)}%)</span>
+                    {s.value}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({Math.round((s.value / total) * 100)}%)
+                    </span>
                   </span>
                 </div>
               ))}
@@ -286,9 +392,23 @@ export function AdminDashboard() {
             <h3 className="text-base font-semibold">Patient demographics</h3>
             <div className="mt-3 h-40">
               <ResponsiveContainer>
-                <BarChart data={[{ name: "Male", value: males }, { name: "Female", value: females }]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--clinic-border-subtle)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <BarChart
+                  data={[
+                    { name: "Male", value: males },
+                    { name: "Female", value: females },
+                  ]}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--clinic-border-subtle)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <YAxis hide />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                     <Cell fill="var(--clinic-blue)" />
@@ -298,8 +418,12 @@ export function AdminDashboard() {
               </ResponsiveContainer>
             </div>
             <div className="mt-3 flex justify-around text-sm">
-              <span style={{ color: "var(--clinic-blue)" }} className="font-medium">{malePct}% Male</span>
-              <span style={{ color: "var(--clinic-pink)" }} className="font-medium">{femalePct}% Female</span>
+              <span style={{ color: "var(--clinic-blue)" }} className="font-medium">
+                {malePct}% Male
+              </span>
+              <span style={{ color: "var(--clinic-pink)" }} className="font-medium">
+                {femalePct}% Female
+              </span>
             </div>
           </Card>
         </Panel>
@@ -310,7 +434,13 @@ export function AdminDashboard() {
             <div className="relative mx-auto mt-2 h-36">
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={docPie} dataKey="value" innerRadius={45} outerRadius={62} paddingAngle={2}>
+                  <Pie
+                    data={docPie}
+                    dataKey="value"
+                    innerRadius={45}
+                    outerRadius={62}
+                    paddingAngle={2}
+                  >
                     {docPie.map((s) => (
                       <Cell key={s.name} fill={s.color} />
                     ))}
@@ -324,7 +454,10 @@ export function AdminDashboard() {
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
               <span className="font-medium text-foreground">Busy:</span>{" "}
-              {doctors.filter((d) => d.status === "BUSY").map((d) => d.name).join(", ")}
+              {doctors
+                .filter((d) => d.status === "BUSY")
+                .map((d) => d.name)
+                .join(", ")}
             </div>
           </Card>
         </Panel>
@@ -335,9 +468,20 @@ export function AdminDashboard() {
             <div className="mt-3 h-40">
               <ResponsiveContainer>
                 <BarChart data={specData} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--clinic-border-subtle)" horizontal={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--clinic-border-subtle)"
+                    horizontal={false}
+                  />
                   <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} width={100} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={100}
+                  />
                   <Bar dataKey="value" fill="var(--clinic-indigo)" radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -378,7 +522,11 @@ export function AdminDashboard() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--clinic-blue-soft)] text-xs font-semibold text-[var(--clinic-blue-strong)]">
-                              {p?.name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
+                              {p?.name
+                                .split(" ")
+                                .map((s) => s[0])
+                                .join("")
+                                .slice(0, 2)}
                             </div>
                             <div>
                               <div className="text-sm font-medium">{p?.name}</div>
@@ -389,9 +537,13 @@ export function AdminDashboard() {
                         <TableCell className="text-sm">{d?.name}</TableCell>
                         <TableCell className="text-sm">
                           <div>{dayjs(a.datetime).format("MMM D")}</div>
-                          <div className="text-xs text-muted-foreground">{dayjs(a.datetime).format("HH:mm")}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {dayjs(a.datetime).format("HH:mm")}
+                          </div>
                         </TableCell>
-                        <TableCell><StatusBadge status={a.status} /></TableCell>
+                        <TableCell>
+                          <StatusBadge status={a.status} />
+                        </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -400,8 +552,23 @@ export function AdminDashboard() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => { updateAppointment(a.id, { status: "COMPLETED" }); toast.success("Marked complete"); }}>Mark complete</DropdownMenuItem>
-                              <DropdownMenuItem className="text-[var(--clinic-red)]" onClick={() => { removeAppointment(a.id); toast("Appointment cancelled"); }}>Cancel</DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  updateAppointment(a.id, { status: "COMPLETED" });
+                                  toast.success("Marked complete");
+                                }}
+                              >
+                                Mark complete
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-[var(--clinic-red)]"
+                                onClick={() => {
+                                  removeAppointment(a.id);
+                                  toast("Appointment cancelled");
+                                }}
+                              >
+                                Cancel
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -418,7 +585,9 @@ export function AdminDashboard() {
           <Card className="p-5">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">Recent activity</h3>
-              <Button variant="ghost" size="sm" onClick={() => setFeed([])}>Clear</Button>
+              <Button variant="ghost" size="sm" onClick={() => setFeed([])}>
+                Clear
+              </Button>
             </div>
             <ScrollArea className="mt-3 h-[400px] pr-3">
               {feed.length === 0 ? (
@@ -432,7 +601,10 @@ export function AdminDashboard() {
                       animate={{ opacity: 1, x: 0 }}
                       className="flex gap-3 text-sm"
                     >
-                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span
+                        className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="leading-snug text-foreground">{item.text}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">{item.time}</p>
@@ -492,27 +664,40 @@ export function AdminDashboard() {
               <div>
                 <CheckCircle2 className="mx-auto h-4 w-4 text-[var(--clinic-green)]" />
                 <div className="mt-1 text-xs text-muted-foreground">Sent</div>
-                <div className="font-semibold text-[var(--clinic-green)]">{todayNotifCounts.sent}</div>
+                <div className="font-semibold text-[var(--clinic-green)]">
+                  {todayNotifCounts.sent}
+                </div>
               </div>
               <div>
                 <XCircle className="mx-auto h-4 w-4 text-[var(--clinic-red)]" />
                 <div className="mt-1 text-xs text-muted-foreground">Failed</div>
-                <div className="font-semibold text-[var(--clinic-red)]">{todayNotifCounts.failed}</div>
+                <div className="font-semibold text-[var(--clinic-red)]">
+                  {todayNotifCounts.failed}
+                </div>
               </div>
               <div>
                 <AlertCircle className="mx-auto h-4 w-4 text-[var(--clinic-yellow)]" />
                 <div className="mt-1 text-xs text-muted-foreground">Pending</div>
-                <div className="font-semibold text-[var(--clinic-yellow)]">{todayNotifCounts.pending}</div>
+                <div className="font-semibold text-[var(--clinic-yellow)]">
+                  {todayNotifCounts.pending}
+                </div>
               </div>
             </div>
             <ul className="mt-3 space-y-2">
               {todayNotifs.slice(0, 3).map((n) => {
                 const p = patients.find((x) => x.id === n.patientId);
                 const dot =
-                  n.status === "SENT" ? "var(--clinic-green)" : n.status === "FAILED" ? "var(--clinic-red)" : "var(--clinic-yellow)";
+                  n.status === "SENT"
+                    ? "var(--clinic-green)"
+                    : n.status === "FAILED"
+                      ? "var(--clinic-red)"
+                      : "var(--clinic-yellow)";
                 return (
                   <li key={n.id} className="flex gap-3 rounded-md border p-2 text-sm">
-                    <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: dot }} />
+                    <span
+                      className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full"
+                      style={{ backgroundColor: dot }}
+                    />
                     <div className="min-w-0">
                       <div className="font-medium">{p?.name}</div>
                       <div className="truncate text-xs text-muted-foreground">{n.message}</div>
@@ -521,7 +706,12 @@ export function AdminDashboard() {
                 );
               })}
             </ul>
-            <Button variant="ghost" size="sm" className="mt-3 w-full" onClick={() => navigate({ to: "/notifications" })}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-3 w-full"
+              onClick={() => navigate({ to: "/notifications" })}
+            >
               View all
             </Button>
           </Card>
@@ -534,7 +724,10 @@ export function AdminDashboard() {
               <Calendar
                 mode="single"
                 modifiers={{ booked: (d) => apptDays.includes(d.getDate()) }}
-                modifiersClassNames={{ booked: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-[var(--clinic-blue)]" }}
+                modifiersClassNames={{
+                  booked:
+                    "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-[var(--clinic-blue)]",
+                }}
                 className="rounded-md"
               />
             </div>

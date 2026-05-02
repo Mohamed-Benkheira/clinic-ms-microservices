@@ -1,12 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchPatients, fetchPatient, createPatient, updatePatient, deletePatient } from "../lib/api/patients.api";
+import {
+  fetchPatients,
+  fetchPatient,
+  createPatient,
+  updatePatient,
+  deletePatient,
+} from "../lib/api/patients.api";
 import { queryKeys } from "../lib/api/query-keys";
 import type { Patient } from "../lib/types";
 
-export function usePatients(page = 1) {
+export function usePatients() {
   return useQuery({
-    queryKey: queryKeys.patients.list(page),
-    queryFn: () => fetchPatients(page),
+    queryKey: queryKeys.patients.all,
+    queryFn: fetchPatients,
   });
 }
 

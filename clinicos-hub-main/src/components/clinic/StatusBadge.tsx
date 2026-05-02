@@ -8,7 +8,13 @@ const map: Record<AppointmentStatus, string> = {
   CANCELLED: "bg-[oklch(0.95_0.05_25)] text-[oklch(0.45_0.2_25)] border-[oklch(0.85_0.12_25)]",
 };
 
-export function StatusBadge({ status, className }: { status: AppointmentStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+}: {
+  status: AppointmentStatus;
+  className?: string;
+}) {
   return (
     <Badge variant="outline" className={cn("font-medium", map[status], className)}>
       {status}

@@ -44,18 +44,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -219,7 +209,7 @@ function MessagesPage() {
   const pinnedConvos = filteredConvos.filter((c) => c.pinned);
   const otherConvos = filteredConvos.filter((c) => !c.pinned);
 
-  const activeConvo = activeId ? conversations.find((c) => c.id === activeId) ?? null : null;
+  const activeConvo = activeId ? (conversations.find((c) => c.id === activeId) ?? null) : null;
 
   const activeMessages = useMemo(() => {
     if (!activeConvo) return [];
@@ -337,7 +327,9 @@ function MessagesPage() {
   function leaveGroup(cid: string) {
     setConversations((cs) =>
       cs.map((c) =>
-        c.id === cid ? { ...c, participantIds: c.participantIds.filter((p) => p !== currentUserId) } : c,
+        c.id === cid
+          ? { ...c, participantIds: c.participantIds.filter((p) => p !== currentUserId) }
+          : c,
       ),
     );
     setActiveId(null);
@@ -396,9 +388,7 @@ function MessagesPage() {
         className="grid h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-[var(--clinic-border-subtle)] bg-card md:h-[calc(100vh-6rem)]"
         style={{ gridTemplateColumns: "minmax(0,1fr)" }}
       >
-        <div
-          className="grid h-full min-h-0 overflow-hidden md:grid-cols-[300px_minmax(0,1fr)]"
-        >
+        <div className="grid h-full min-h-0 overflow-hidden md:grid-cols-[300px_minmax(0,1fr)]">
           {/* LEFT PANEL */}
           <aside
             className={cn(
@@ -408,11 +398,7 @@ function MessagesPage() {
           >
             <div className="flex items-center justify-between border-b border-[var(--clinic-border-subtle)] p-4">
               <h1 className="text-base font-semibold">Messages</h1>
-              <Button
-                size="sm"
-                onClick={() => setNewConvoOpen(true)}
-                className="gap-1.5"
-              >
+              <Button size="sm" onClick={() => setNewConvoOpen(true)} className="gap-1.5">
                 <Plus className="h-4 w-4" />
                 New
               </Button>
@@ -577,11 +563,7 @@ function MessagesPage() {
                         onAdd={(id) => addMember(activeConvo.id, id)}
                       />
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setInfoOpen(true)}
-                    >
+                    <Button variant="ghost" size="icon" onClick={() => setInfoOpen(true)}>
                       <Info className="h-4 w-4" />
                     </Button>
                   </div>
@@ -621,7 +603,8 @@ function MessagesPage() {
                             const isMe = m.senderId === currentUserId;
                             const prev = group.items[idx - 1];
                             const consecutive =
-                              prev && prev.senderId === m.senderId &&
+                              prev &&
+                              prev.senderId === m.senderId &&
                               dayjs(m.sentAt).diff(dayjs(prev.sentAt), "minute") < 5;
                             const replyMsg = m.replyToId
                               ? messages.find((x) => x.id === m.replyToId)
@@ -811,9 +794,7 @@ function ConvoItem({
       onClick={onClick}
       className={cn(
         "mb-0.5 flex w-full items-center gap-3 rounded-lg p-2.5 text-left transition-colors",
-        active
-          ? "bg-[var(--clinic-blue-soft)]"
-          : "hover:bg-[var(--clinic-gray-soft)]",
+        active ? "bg-[var(--clinic-blue-soft)]" : "hover:bg-[var(--clinic-gray-soft)]",
       )}
     >
       {c.type === "GROUP" ? (
@@ -825,7 +806,14 @@ function ConvoItem({
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className={cn("truncate text-sm", active ? "font-semibold text-[var(--clinic-blue-strong)]" : "font-medium text-foreground")}>
+          <span
+            className={cn(
+              "truncate text-sm",
+              active
+                ? "font-semibold text-[var(--clinic-blue-strong)]"
+                : "font-medium text-foreground",
+            )}
+          >
             {name}
           </span>
           <span className="shrink-0 text-[10px] text-muted-foreground">
@@ -887,10 +875,7 @@ function MessageBubble({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className={cn(
-        "group flex items-end gap-2",
-        isMe ? "flex-row-reverse" : "flex-row",
-      )}
+      className={cn("group flex items-end gap-2", isMe ? "flex-row-reverse" : "flex-row")}
     >
       {!isMe && (
         <div className="w-7 shrink-0">
@@ -906,9 +891,7 @@ function MessageBubble({
         <div
           className={cn(
             "relative px-3.5 py-2 text-sm shadow-sm",
-            isMe
-              ? "bg-[var(--clinic-blue)] text-white"
-              : "bg-card text-foreground",
+            isMe ? "bg-[var(--clinic-blue)] text-white" : "bg-card text-foreground",
           )}
           style={{
             borderRadius: isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
@@ -935,7 +918,9 @@ function MessageBubble({
             >
               <Paperclip className="h-3 w-3" />
               <span className="font-medium">{m.attachmentName}</span>
-              <span className={cn(isMe ? "opacity-70" : "text-muted-foreground")}>· PDF · 240 KB</span>
+              <span className={cn(isMe ? "opacity-70" : "text-muted-foreground")}>
+                · PDF · 240 KB
+              </span>
             </div>
           )}
           <div className="whitespace-pre-wrap break-words">{m.content}</div>
@@ -1208,9 +1193,10 @@ function ConvoInfoSheet({
   }, [convo.id, convo.name]);
 
   const members = convo.participantIds.map((id) => staff.find((s) => s.id === id)!).filter(Boolean);
-  const other = convo.type === "DIRECT"
-    ? staff.find((s) => convo.participantIds.find((p) => p !== currentUserId) === s.id)
-    : undefined;
+  const other =
+    convo.type === "DIRECT"
+      ? staff.find((s) => convo.participantIds.find((p) => p !== currentUserId) === s.id)
+      : undefined;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -1252,11 +1238,7 @@ function ConvoInfoSheet({
                 <span className="font-mono text-xs">{other.id}</span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => onViewProfile(other.id)}
-            >
+            <Button variant="outline" className="w-full" onClick={() => onViewProfile(other.id)}>
               View Profile
             </Button>
             <Separator />

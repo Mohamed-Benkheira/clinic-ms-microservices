@@ -24,12 +24,32 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"] },
+  {
+    to: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"],
+  },
   { to: "/patients", label: "Patients", icon: Users, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
   { to: "/doctors", label: "Doctors", icon: Stethoscope, roles: ["ADMIN", "RECEPTIONIST"] },
-  { to: "/appointments", label: "Appointments", icon: CalendarDays, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"] },
-  { to: "/notifications", label: "Notifications", icon: BellRing, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"] },
-  { to: "/messages", label: "Messages", icon: MessageSquare, roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"] },
+  {
+    to: "/appointments",
+    label: "Appointments",
+    icon: CalendarDays,
+    roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"],
+  },
+  {
+    to: "/notifications",
+    label: "Notifications",
+    icon: BellRing,
+    roles: ["ADMIN", "DOCTOR", "RECEPTIONIST", "PATIENT"],
+  },
+  {
+    to: "/messages",
+    label: "Messages",
+    icon: MessageSquare,
+    roles: ["ADMIN", "DOCTOR", "RECEPTIONIST"],
+  },
 ];
 
 function currentStaffIdFor(role: "ADMIN" | "DOCTOR" | "RECEPTIONIST" | "PATIENT"): string | null {
@@ -99,7 +119,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {items.map((item) => {
-            const active = pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to));
+            const active =
+              pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to));
             const Icon = item.icon;
             const showBadge = item.to === "/messages" && totalUnread > 0;
             return (
@@ -128,14 +149,24 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="border-t border-[var(--clinic-border-subtle)] p-3">
           <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--clinic-blue-soft)] text-sm font-semibold text-[var(--clinic-blue-strong)]">
-              {user.name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
+              {user.name
+                .split(" ")
+                .map((s) => s[0])
+                .join("")
+                .slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium text-foreground">{user.name}</div>
-              <div className="truncate text-xs text-muted-foreground capitalize">{user.role.toLowerCase()}</div>
+              <div className="truncate text-xs text-muted-foreground capitalize">
+                {user.role.toLowerCase()}
+              </div>
             </div>
           </div>
-          <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground" onClick={handleLogout}>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground"
+            onClick={handleLogout}
+          >
             <LogOut className="h-4 w-4" /> Sign out
           </Button>
         </div>

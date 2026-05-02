@@ -15,7 +15,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Sign in — ClinicOS" },
-      { name: "description", content: "Sign in to ClinicOS — the premium medical SaaS platform for modern clinics." },
+      {
+        name: "description",
+        content: "Sign in to ClinicOS — the premium medical SaaS platform for modern clinics.",
+      },
     ],
   }),
   component: LoginPage,
@@ -28,28 +31,52 @@ const ROLE_CARDS: Array<{
   iconBg: string;
   iconColor: string;
 }> = [
-  { role: "ADMIN",        label: "Administrator", icon: ShieldCheck, iconBg: "var(--clinic-indigo-soft)", iconColor: "var(--clinic-indigo)"          },
-  { role: "DOCTOR",       label: "Doctor",        icon: Stethoscope, iconBg: "var(--clinic-blue-soft)",  iconColor: "var(--clinic-blue)"             },
-  { role: "RECEPTIONIST", label: "Receptionist",  icon: UserCog,     iconBg: "var(--clinic-cyan-soft)",  iconColor: "var(--clinic-cyan)"             },
-  { role: "PATIENT",      label: "Patient",       icon: User,        iconBg: "var(--clinic-gray-soft)",  iconColor: "var(--clinic-text-secondary)"   },
+  {
+    role: "ADMIN",
+    label: "Administrator",
+    icon: ShieldCheck,
+    iconBg: "var(--clinic-indigo-soft)",
+    iconColor: "var(--clinic-indigo)",
+  },
+  {
+    role: "DOCTOR",
+    label: "Doctor",
+    icon: Stethoscope,
+    iconBg: "var(--clinic-blue-soft)",
+    iconColor: "var(--clinic-blue)",
+  },
+  {
+    role: "RECEPTIONIST",
+    label: "Receptionist",
+    icon: UserCog,
+    iconBg: "var(--clinic-cyan-soft)",
+    iconColor: "var(--clinic-cyan)",
+  },
+  {
+    role: "PATIENT",
+    label: "Patient",
+    icon: User,
+    iconBg: "var(--clinic-gray-soft)",
+    iconColor: "var(--clinic-text-secondary)",
+  },
 ];
 
 // Demo credentials that must exist in the backend
 // Run: docker exec clinicos_auth python3 manage.py shell -c "..."  to seed these
 const DEMO_PASSWORDS: Record<Role, string> = {
-  ADMIN:        "Admin1234!",
-  DOCTOR:       "Doctor1234!",
+  ADMIN: "Admin1234!",
+  DOCTOR: "Doctor1234!",
   RECEPTIONIST: "Reception1234!",
-  PATIENT:      "Patient1234!",
+  PATIENT: "Patient1234!",
 };
 
 function LoginPage() {
   const { user, login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) navigate({ to: "/dashboard" });
@@ -65,8 +92,7 @@ function LoginPage() {
       const msg =
         (err as { response?: { data?: { non_field_errors?: string[]; detail?: string } } })
           ?.response?.data?.non_field_errors?.[0] ??
-        (err as { response?: { data?: { detail?: string } } })
-          ?.response?.data?.detail ??
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ??
         "Invalid email or password.";
       setError(msg);
       toast.error(msg);
@@ -87,7 +113,7 @@ function LoginPage() {
   // Prefill the form with demo credentials and submit immediately
   const pickRole = (role: Role) => {
     const demoEmail = DEMO_USERS[role].email;
-    const demoPass  = DEMO_PASSWORDS[role];
+    const demoPass = DEMO_PASSWORDS[role];
     setEmail(demoEmail);
     setPassword(demoPass);
     doLogin(demoEmail, demoPass);
@@ -127,7 +153,9 @@ function LoginPage() {
             from a single, intuitive workspace built for modern healthcare teams.
           </p>
         </div>
-        <div className="relative text-xs text-white/50">© {new Date().getFullYear()} ClinicOS. All rights reserved.</div>
+        <div className="relative text-xs text-white/50">
+          © {new Date().getFullYear()} ClinicOS. All rights reserved.
+        </div>
       </div>
 
       {/* Right: form */}
@@ -140,8 +168,12 @@ function LoginPage() {
             <span className="text-lg font-semibold">ClinicOS</span>
           </div>
 
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Sign in to your account</h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">Welcome back. Enter your credentials to continue.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            Sign in to your account
+          </h2>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Welcome back. Enter your credentials to continue.
+          </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
             <div className="space-y-2">
@@ -151,7 +183,10 @@ function LoginPage() {
                 type="email"
                 placeholder="you@clinicos.med"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
                 disabled={loading}
                 autoComplete="email"
               />
@@ -163,19 +198,22 @@ function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(null);
+                }}
                 disabled={loading}
                 autoComplete="current-password"
               />
             </div>
 
-            {error && (
-              <p className="text-sm font-medium text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…
+                </>
               ) : (
                 "Sign In"
               )}
@@ -184,7 +222,9 @@ function LoginPage() {
 
           <div className="my-8 flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">Or continue as a demo user</span>
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              Or continue as a demo user
+            </span>
             <Separator className="flex-1" />
           </div>
 
@@ -203,7 +243,9 @@ function LoginPage() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="text-sm font-semibold text-foreground">{label}</div>
-                <div className="mt-0.5 truncate text-xs text-muted-foreground">{DEMO_USERS[role].email}</div>
+                <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {DEMO_USERS[role].email}
+                </div>
                 <div className="mt-2 flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
                   Continue <ArrowRight className="h-3 w-3" />
                 </div>
